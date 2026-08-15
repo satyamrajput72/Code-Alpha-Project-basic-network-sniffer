@@ -1,0 +1,57 @@
+rom scapy.all import sniff, IP, TCP, UDP, ICMP, Raw
+
+
+def show_packet(packet):
+    if IP not in packet:
+        return
+
+    source_ip = packet[IP].src
+    destination_ip = packet[IP].dst
+
+    print("\n" + "-" * 60)
+    print("Source IP      :", source_ip)
+    print("Destination IP :", destination_ip)
+
+    # Check the protocol
+    if TCP in packet:
+        protocol = "TCP"
+        print("Source Port    :", packet[TCP].sport)
+        print("Destination Port:", packet[TCP].dport)
+
+    elif UDP in packet:
+        protocol = "UDP"
+        print("Source Port    :", packet[UDP].sport)
+        print("Destination Port:", packet[UDP].dport)
+
+    elif ICMP in packet:
+        protocol = "ICMP"
+
+    else:
+        protocol = "Other"
+
+    print("Protocol       :", protocol)
+    print("Packet Size    :", len(packet), "bytes")
+
+    # Show payload if available
+    if Raw in packet:
+        payload = packet[Raw].load
+
+        try:
+            text = payload.decode("utf-8", errors="replace")
+            print("Payload        :", text[:100])
+        except Exception:
+            print("Payload        : Binary data")
+
+
+print("=" * 60)
+print("             BASIC NETWORK SNIFFER")
+print("=" * 60)
+print("Capturing packets...")
+print("Press CTRL+C to stop the program.")
+
+try:
+    sniff(prn=show_packet, store=False)
+
+except KeyboardInterrupt:
+    print("\n\nPacket capturing stopped.")
+    print("Sniffer closed successfully.")
